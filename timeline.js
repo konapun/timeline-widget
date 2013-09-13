@@ -23,7 +23,7 @@ function Timeline(data) {
 			start: 2500,
 			color: '#ee3465'
 		},
-		/* Extended */
+		/* Expanded */
 		{
 			name: 'Paleozoic',
 			start: 550,
@@ -45,12 +45,14 @@ function Timeline(data) {
 			color: ''
 		}
 	],
+	myaExpanded = 550, // total number of years accounted for in expanded region
+	myaCompressed = 3950, // total number of years accounted for in compressed region
 	compressedRatio = 1/4, // how much of the space to use for compressed periods
+	eonWidth = 24,
+	iterationWidth = 38,
 	
 	getPeriodDrawHeight = function(start, end, totalHeight) {
 		var availablePixels = totalHeight,
-		    myaExpanded = 550, // total number of years accounted for in expanded region
-			myaCompressed = 3950, // total number of years accounted for in compressed region
 			myaInPeriod = start - end;
 		
 		if (start <= myaExpanded) { // expanded view for newer times; all expanded share 3/4 of the space
@@ -68,16 +70,10 @@ function Timeline(data) {
 		
 		return totalHeight / (times.length-1);
 	},
-	drawScale = function(ctx, width, height) {
-		var textHeight = 8, // height of text in pixels, will be width when drawn vertically
-		    drawPos = height,
-			evenColor = '#ebecee',
-			oddColor = '#afb1b0',
-			eonWidth = 24,
-			iterationWidth = 38,
-			drawEven = true,
-			drawCoords = [];
-		for (var i = 0; i < times.length-1; i++) {
+	drawEons = function(ctx, width, height) {
+		var textHeight = 8,
+		    drawPos = height;
+		for (var i = 0; i < times.length-1; i++) { 
 			var time = times[i],
 			    name = time.name,
 				start = time.start,
@@ -85,48 +81,13 @@ function Timeline(data) {
 				color = time.color,
 				drawHeight = getPeriodDrawHeight(start, end, height);
 			
-			/* draw the background */
+			/* Draw the eon background */
 			ctx.fillStyle = color;
 			ctx.fillRect(0, drawPos-drawHeight, eonWidth, drawHeight);
 			ctx.strokeStyle = 'black';
 			ctx.strokeRect(0, drawPos-drawHeight, eonWidth, drawHeight);
 			
-			/* Draw the scale lines */
-			var divisions = 100, // draw divisions at every 100mya
-			    iterations = (start - end) / divisions,
-				iterationHeight = drawHeight / iterations,
-				iterDrawPos = drawPos;
-			for (var j = 0; j < iterations; j++) {
-				if (drawEven) {
-					ctx.fillStyle = evenColor;
-				}
-				else {
-					ctx.fillStyle = oddColor;
-				}
-				drawEven = !drawEven;
-				
-				/* Iteration background */
-				var drawCoord = {
-					x: eonWidth+1,
-					y: iterDrawPos-iterationHeight,
-					width: iterationWidth,
-					height: iterationHeight,
-					start: start,
-					end: end,
-					span: start - end,
-					iter: j
-				};
-				ctx.fillRect(drawCoord.x, drawCoord.y, drawCoord.width, drawCoord.height);
-				drawCoords.push(drawCoord);
-				
-				iterDrawPos = iterDrawPos - iterationHeight;
-			}
-			
-			/* Outline the iterations scale */
-			ctx.strokeStyle = 'black';
-			ctx.strokeRect(eonWidth, 0, iterationWidth, height);
-			
-			/* draw the era text*/
+			/* Draw the eon text */
 			var textWidth = ctx.measureText(name).width;
 			ctx.save();
 			ctx.font = 'bold';
@@ -137,24 +98,97 @@ function Timeline(data) {
 			
 			drawPos = drawPos - drawHeight;
 		}
+	},
+	drawScale = function(ctx, width, height) {
+		var compressedDivSpan = 100, // draw divisions at every 100 mya for compressed
+		    expandedDivSpan = 100, // draw divisions at every 50 mya for expanded
+			currTime = times[0].start,
+			drawPos = height,
+			drawEven = false,
+			evenColor = '#ebecee',
+			oddColor = '#afb1b0',
+			scaleChange = height - height * compressedRatio,
+			compressedHeight = height - scaleChange,
+			expandedHeight = height - compressedHeight,
+			compressedDivHeight = compressedHeight / (myaCompressed / compressedDivSpan),
+			expandedDivHeight = expandedHeight / (myaExpanded / expandedDivSpan),
+			drawCoords = [];
 		
-		/* FIXME Draw the year labels */
-		/*
-		ctx.fillStyle = 'black';
-		for (var i = 0; i < drawCoords.length; i++) {
-			var coord = drawCoords[i];
+		/* Draw compressed divisions */
+		while (currTime > myaExpanded)  {
+			drawPos -= compressedDivHeight;
 			
-			if (i%4 == 0) ctx.fillText('- ' + (coord.end - (coord.span * coord.iter)) + ' -', coord.x, coord.y, iterationWidth);
+			if (drawEven) {
+				ctx.fillStyle = evenColor;
+			}
+			else {
+				ctx.fillStyle = oddColor;
+			}
+			drawEven = !drawEven;
+			
+			ctx.fillRect(eonWidth+1, drawPos, iterationWidth, compressedDivHeight);
+			
+			currTime -= compressedDivSpan;
 		}
-		*/
 		
-		/* Draw the scale change division line */
-		var divYPos = height - height * compressedRatio;
+		/* Draw expanded divisions */
+		currTime = myaExpanded;
+		drawPos = scaleChange;
+		var cmod = currTime % 100;
+		if (cmod > 0) { // want color changes to demarcate 100 year marks so we make up the difference
+			var corrHeight = expandedDivHeight / (expandedDivSpan / cmod);
+			drawPos -= corrHeight;
+			if (drawEven) {
+				ctx.fillStyle = evenColor;
+			}
+			else  {
+				ctx.fillStyle = oddColor;
+			}
+			drawEven = !drawEven;
+			
+			ctx.fillRect(eonWidth+1, drawPos, iterationWidth, corrHeight);
+			
+			currTime -= cmod;
+		}
+		while (currTime >= 0) {
+			drawPos -= expandedDivHeight;
+			if (drawEven) {
+				ctx.fillStyle = evenColor;
+			}
+			else {
+				ctx.fillStyle = oddColor;
+			}
+			drawEven = !drawEven;
+			
+			ctx.fillRect(eonWidth+1, drawPos, iterationWidth, expandedDivHeight);
+			
+			currTime -= expandedDivHeight;
+		}
+		if (drawPos > 0)  {
+			if (drawEven) {
+				ctx.fillStyle = evenColor;
+			}
+			else {
+				ctx.fillStyle = oddColor;
+			}
+			
+			ctx.fillRect(eonWidth+1, 0, iterationWidth, drawPos);
+		}
+		
+		/* Draw the scale division */
 		ctx.strokeStyle = 'black';
 		ctx.beginPath();
-		ctx.moveTo(eonWidth+1, divYPos);
-		ctx.lineTo(63, divYPos);
+		ctx.moveTo(eonWidth+1, scaleChange);
+		ctx.lineTo(eonWidth+iterationWidth, scaleChange);
 		ctx.stroke();
+		
+		/* Draw the outline */
+		ctx.strokeStyle = 'black';
+		ctx.strokeRect(eonWidth, 0, iterationWidth, height);
+	},
+	drawBar = function(ctx, width, height) {
+		drawEons(ctx, width, height);
+		drawScale(ctx, width, height);
 	},
 	pixelBoundsForPeriod = function(start, end, height) {
 		var startPx = height,
@@ -248,7 +282,7 @@ function Timeline(data) {
 							cpyX = xpos,
 							cpyY = ypos;
 						img.onload = function() { 
-							ctx2.drawImage(img, cpyX+10, cpyY-15, 30, 30);
+							ctx2.drawImage(img, cpyX+10, cpyY-10, 20, 20);
 							
 							if (++opsDone == opsTotal) { // finished all placement ops, do actual dodging draw
 								dodger.dodge();
@@ -267,7 +301,7 @@ function Timeline(data) {
 		    width = canvas.width,
 			height = canvas.height;
 		
-		drawScale(context, width, height);
+		drawBar(context, width, height);
 		drawLabels(context, width, height);
 	};
 }
