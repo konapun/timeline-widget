@@ -112,7 +112,7 @@ function Timeline(data) {
 			expandedHeight = height - compressedHeight,
 			compressedDivHeight = compressedHeight / (myaCompressed / compressedDivSpan),
 			expandedDivHeight = expandedHeight / (myaExpanded / expandedDivSpan),
-			drawCoords = [];
+			labelCoords = []; // hold coords and years for labeling step
 		
 		/* Draw compressed divisions */
 		while (currTime > myaExpanded)  {
@@ -126,6 +126,15 @@ function Timeline(data) {
 			}
 			drawEven = !drawEven;
 			
+			labelCoords.push({
+				x: eonWidth+1,
+				y: drawPos,
+				width: iterationWidth,
+				height: compressedDivHeight,
+				start: currTime,
+				end: currTime - compressedDivSpan,
+				compressed: true,
+			});
 			ctx.fillRect(eonWidth+1, drawPos, iterationWidth, compressedDivHeight);
 			
 			currTime -= compressedDivSpan;
@@ -146,6 +155,14 @@ function Timeline(data) {
 			}
 			drawEven = !drawEven;
 			
+			labelCoords.push({
+				x: eonWidth+1,
+				y: drawPos,
+				width: iterationWidth,
+				height: corrHeight,
+				start: currTime,
+				end: currTime - cmod,
+			});
 			ctx.fillRect(eonWidth+1, drawPos, iterationWidth, corrHeight);
 			
 			currTime -= cmod;
@@ -160,9 +177,17 @@ function Timeline(data) {
 			}
 			drawEven = !drawEven;
 			
+			labelCoords.push({
+				x: eonWidth+1,
+				y: drawPos,
+				width: iterationWidth,
+				height: expandedDivHeight,
+				start: currTime,
+				end: currTime - expandedDivSpan
+			});
 			ctx.fillRect(eonWidth+1, drawPos, iterationWidth, expandedDivHeight);
 			
-			currTime -= expandedDivHeight;
+			currTime -= expandedDivSpan;
 		}
 		if (drawPos > 0)  {
 			if (drawEven) {
@@ -172,10 +197,18 @@ function Timeline(data) {
 				ctx.fillStyle = oddColor;
 			}
 			
+			labelCoords.push({
+				x: eonWidth+1,
+				y: 0,
+				width: iterationWidth,
+				height: drawPos,
+				start: currTime,
+				end: 0
+			});
 			ctx.fillRect(eonWidth+1, 0, iterationWidth, drawPos);
 		}
 		
-		/* Draw the scale division */
+		/* Draw the scale change division */
 		ctx.strokeStyle = 'black';
 		ctx.beginPath();
 		ctx.moveTo(eonWidth+1, scaleChange);
@@ -185,6 +218,18 @@ function Timeline(data) {
 		/* Draw the outline */
 		ctx.strokeStyle = 'black';
 		ctx.strokeRect(eonWidth, 0, iterationWidth, height);
+		
+		/* Draw the year division labels */
+		ctx.fillStyle = 'black';
+		for (var i = 0; i < labelCoords.length; i++) {
+			var coord = labelCoords[i],
+			    text = coord.end,
+				textWidth = ctx.measureText(text).width;
+			
+			if (text > 0 && (!coord.compressed || (text%1000 === 0))) {
+				ctx.fillText(text, coord.x + (coord.width-textWidth)/2, coord.y + 6/2);
+			}
+		}
 	},
 	drawBar = function(ctx, width, height) {
 		drawEons(ctx, width, height);
