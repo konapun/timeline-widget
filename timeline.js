@@ -10,7 +10,7 @@ function Timeline(data) {
 		/* Compressed */
 		{
 			name: 'Had.',
-			start: 4500,
+			start: 4600,
 			color: '#ad1f81'
 		},
 		{
@@ -26,17 +26,17 @@ function Timeline(data) {
 		/* Expanded */
 		{
 			name: 'Paleozoic',
-			start: 550,
+			start: 542,
 			color: '#99c18d'
 		},
 		{
 			name: 'Mesozoic',
-			start: 250,
+			start: 252,
 			color: '#64c6c9'
 		},
 		{
 			name: 'Cenozoic',
-			start: 60,
+			start: 66,
 			color: '#ebe82b'
 		},
 		{ // used as a stopper
@@ -45,8 +45,8 @@ function Timeline(data) {
 			color: ''
 		}
 	],
-	myaExpanded = 550, // total number of years accounted for in expanded region
-	myaCompressed = 3950, // total number of years accounted for in compressed region
+	myaExpanded = 542, // total number of years accounted for in expanded region
+	myaCompressed = 4058, // total number of years accounted for in compressed region
 	compressedRatio = 1/4, // how much of the space to use for compressed periods
 	eonWidth = 24,
 	iterationWidth = 38,
@@ -105,8 +105,8 @@ function Timeline(data) {
 			currTime = times[0].start,
 			drawPos = height,
 			drawEven = false,
-			evenColor = '#ebecee',
-			oddColor = '#afb1b0',
+			oddColor = '#ebecee',
+			evenColor = '#afb1b0',
 			scaleChange = height - height * compressedRatio,
 			compressedHeight = height - scaleChange,
 			expandedHeight = height - compressedHeight,
@@ -293,7 +293,7 @@ function Timeline(data) {
 			branch: {
 				'length': 550,
 				'correction': 0,
-				'noshow': true
+				'showYear': false
 			},
 			figurines: []
 		});
