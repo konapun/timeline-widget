@@ -278,7 +278,30 @@ function Timeline(data) {
 		
 		return pixelBounds.start - (ageSincePeriodStart / myaPerPixel);
 	},
-	drawLabels = function(ctx, width, height) {
+	generateLinks = function(canvas, rows, clickCb) {
+		canvas.addEventListener("click", function(e) {
+			var clickX = e.pageX,
+			    clickY = e.pageY;
+			for (var i = 0; i < rows.length; i++) {
+				var row = rows[i],
+				    item = row.items[0],
+				    text = item.res,
+					x = item.x,
+					y = row.y,
+					width = item.width,
+					height = row.height;
+				
+				if (clickX >= x && clickX <= x + width && clickY >= y && clickY <= y + height) {
+					var orgs = text.match(/(.+),/),
+					    org = orgs[0].substring(0, orgs[0].length-1);
+					
+					clickCb(org);
+					break;
+				}
+			}
+		});
+	},
+	drawLabels = function(ctx, width, height, linkClick) {
 		var dodger = new LabelDodge(ctx), // make it so labels don't overlap
 		    opsTotal = 0,
 		    opsDone = 0; // keep track of whether or not all image load events have fired so that dodge can be called correctly
@@ -316,6 +339,7 @@ function Timeline(data) {
 				
 				var xpos = 0,
 				    ypos = ageToPx(age, height),
+					rows = [],
 				    textWidth = ctx.measureText(visible).width;
 				ctx2.fillText(visible, xpos, ypos);
 				xpos += textWidth;
@@ -330,7 +354,10 @@ function Timeline(data) {
 							ctx2.drawImage(img, cpyX+10, cpyY-10, 20, 20);
 							
 							if (++opsDone == opsTotal) { // finished all placement ops, do actual dodging draw
-								dodger.dodge();
+								var rows = dodger.dodge();
+								if (linkClick) {
+									generateLinks(ctx.canvas, rows, linkClick);
+								}
 							}
 						}
 						img.src = fig;
@@ -341,12 +368,13 @@ function Timeline(data) {
 		}
 	};
 	
-	this.render = function(canvas) {
+	this.render = function(canvas, linkClick) {
 		var context = canvas.getContext('2d'),
 		    width = canvas.width,
 			height = canvas.height;
+		linkClick = typeof linkClick === 'undefined' ? false : linkClick;
 		
 		drawBar(context, width, height);
-		drawLabels(context, width, height);
+		drawLabels(context, width, height, linkClick);
 	};
 }
