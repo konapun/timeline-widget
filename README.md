@@ -1,7 +1,7 @@
 # Timeline.js
 Display evolutionary history from the beginning of earth time
 
-[!example] (images/rendered-timeline.png)
+![example](images/rendered-timeline.png "example")
 
 ## Example
 ```html
