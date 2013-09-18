@@ -280,8 +280,8 @@ function Timeline(data) {
 	},
 	generateLinks = function(canvas, rows, clickCb) {
 		canvas.addEventListener("click", function(e) {
-			var clickX = e.pageX,
-			    clickY = e.pageY;
+			var clickX = e.pageX - canvas.offsetLeft,
+			    clickY = e.pageY - canvas.offsetTop;
 			for (var i = 0; i < rows.length; i++) {
 				var row = rows[i],
 				    item = row.items[0],
@@ -291,7 +291,7 @@ function Timeline(data) {
 					width = item.width,
 					height = row.height;
 				
-				if (clickX >= x && clickX <= x + width && clickY >= y && clickY <= y + height) {
+				if (clickX >= x && clickX <= x + width && clickY <= y && clickY >= y - height) {
 					var orgs = text.match(/(.+),/),
 					    org = orgs[0].substring(0, orgs[0].length-1);
 					
