@@ -1,5 +1,5 @@
 # Timeline.js
-Display evolutionary history from the beginning of earth time
+Display evolutionary history from the beginning of earth time on an HTML5 canvas
 
 ![example](images/rendered-timeline.png "example")
 
