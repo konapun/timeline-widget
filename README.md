@@ -1,7 +1,7 @@
 # Timeline.js
 Display evolutionary history from the beginning of earth time
 
-[!example](images/rendered-timeline.png)
+[!example] (images/rendered-timeline.png)
 
 ## Example
 ```html
@@ -16,10 +16,10 @@ Display evolutionary history from the beginning of earth time
 
 ## Specifying organisms
 Organisms are passed as an array of anonymous objects with the following attributes:
-  * *id:* NCBI ID or -1
-  * *name:* Name of organism to use as label
-  * *branch*
-    * *length:*  Evolutionary time for this organism, in MYA (millions of years ago)
-	* *correction:* +- correction for time estimate
-	* *noshow:* Don't display time in the label
-  * *figurines:* An array of paths to images to show for this label 
+  * **id:** NCBI ID or -1
+  * **name:** Name of organism to use as label
+  * **branch**
+    * **length:**  Evolutionary time for this organism, in MYA (millions of years ago)
+	* **correction:** +- correction for time estimate
+	* **noshow:** Don't display time in the label
+  * **figurines:** An array of paths to images to show for this label 
