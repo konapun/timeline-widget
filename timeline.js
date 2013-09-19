@@ -278,7 +278,7 @@ function Timeline(data) {
 		
 		return pixelBounds.start - (ageSincePeriodStart / myaPerPixel);
 	},
-	generateLinks = function(canvas, rows, clickCb) {
+	handleEvents = function(canvas, rows, clickCb) {
 		canvas.addEventListener("click", function(e) {
 			var clickX = e.pageX - canvas.offsetLeft,
 			    clickY = e.pageY - canvas.offsetTop;
@@ -291,9 +291,8 @@ function Timeline(data) {
 					width = item.width,
 					height = row.height;
 				
-				if (clickX >= x && clickX <= x + width && clickY <= y && clickY >= y - height) {
-					var orgs = text.match(/(.+),/),
-					    org = orgs[0].substring(0, orgs[0].length-1);
+				if (clickX >= x && clickX <= x + width && clickY <= y && clickY >= y - height) { // click within organism bounds; execute callback with located organism
+					var org = data[i];
 					
 					clickCb(org);
 					break;
@@ -356,7 +355,7 @@ function Timeline(data) {
 							if (++opsDone == opsTotal) { // finished all placement ops, do actual dodging draw
 								var rows = dodger.dodge();
 								if (linkClick) {
-									generateLinks(ctx.canvas, rows, linkClick);
+									handleEvents(ctx.canvas, rows, linkClick);
 								}
 							}
 						}
