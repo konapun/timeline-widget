@@ -36,7 +36,8 @@ To build a new timeline, just pass an array of organisms (as defined above) to t
 ### Rendering
 The render function takes the canvas element where the timeline is to be drawn as the first parameter,
 and optionally takes an events object as the second parameter, which can define callbacks for events.
-Event callbacks are passed the organism which fired the event, with the organism structure as defined above.
+Event callbacks are passed the organism which fired the event (with the organism structure as defined
+above), the event itself, and the label row the organism belongs to (from label-dodge).
 The following events can be handled:
   * **onclick:** event fired when an organism on the timeline is clicked
   * **onhover:** event fired when an organism on the timeline is hovered over

@@ -296,7 +296,7 @@ function Timeline(data) {
 					if (posX >= x && posX <= x + width && posY <= y && posY >= y - height) { // event within organism bounds; execute callback with located organism
 						var org = data[i];
 						
-						cb(org);
+						cb(org, e, row);
 						break;
 					}
 				}
