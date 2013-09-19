@@ -278,29 +278,42 @@ function Timeline(data) {
 		
 		return pixelBounds.start - (ageSincePeriodStart / myaPerPixel);
 	},
-	handleEvents = function(canvas, rows, clickCb) {
-		canvas.addEventListener("click", function(e) {
-			var clickX = e.pageX - canvas.offsetLeft,
-			    clickY = e.pageY - canvas.offsetTop;
-			for (var i = 0; i < rows.length; i++) {
-				var row = rows[i],
-				    item = row.items[0],
-				    text = item.res,
-					x = item.x,
-					y = row.y,
-					width = item.width,
-					height = row.height;
-				
-				if (clickX >= x && clickX <= x + width && clickY <= y && clickY >= y - height) { // click within organism bounds; execute callback with located organism
-					var org = data[i];
+	handleEvents = function(canvas, rows, events) {
+		var onClick = events.onclick,
+		    onHover = events.onhover,
+			evtFn = function(e, cb) {
+				var posX = e.pageX - canvas.offsetLeft,
+				    posY = e.pageY - canvas.offsetTop;
+				for (var i = 0; i < rows.length; i++) {
+					var row = rows[i],
+					    item = row.items[0],
+						text = item.res,
+						x = item.x,
+						y = row.y,
+						width = item.width,
+						height = row.height;
 					
-					clickCb(org);
-					break;
+					if (posX >= x && posX <= x + width && posY <= y && posY >= y - height) { // event within organism bounds; execute callback with located organism
+						var org = data[i];
+						
+						cb(org);
+						break;
+					}
 				}
 			}
-		});
+		
+		if (onClick) {
+			canvas.addEventListener('click', function(e) {
+				evtFn(e, onClick);
+			});
+		}
+		if (onHover) {
+			canvas.addEventListener('mousemove', function(e) {
+				evtFn(e, onHover);
+			});
+		}
 	},
-	drawLabels = function(ctx, width, height, linkClick) {
+	drawLabels = function(ctx, width, height, events) {
 		var dodger = new LabelDodge(ctx), // make it so labels don't overlap
 		    opsTotal = 0,
 		    opsDone = 0; // keep track of whether or not all image load events have fired so that dodge can be called correctly
@@ -354,8 +367,8 @@ function Timeline(data) {
 							
 							if (++opsDone == opsTotal) { // finished all placement ops, do actual dodging draw
 								var rows = dodger.dodge();
-								if (linkClick) {
-									handleEvents(ctx.canvas, rows, linkClick);
+								if (events) {
+									handleEvents(ctx.canvas, rows, events);
 								}
 							}
 						}
@@ -367,13 +380,12 @@ function Timeline(data) {
 		}
 	};
 	
-	this.render = function(canvas, linkClick) {
+	this.render = function(canvas, events) {
 		var context = canvas.getContext('2d'),
 		    width = canvas.width,
 			height = canvas.height;
-		linkClick = typeof linkClick === 'undefined' ? false : linkClick;
 		
 		drawBar(context, width, height);
-		drawLabels(context, width, height, linkClick);
+		drawLabels(context, width, height, events);
 	};
 }
