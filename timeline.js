@@ -5,7 +5,7 @@
  */
 function Timeline(data) {
 	this.data = data;
-	
+
 	var times = [
 		/* Compressed */
 		{
@@ -50,43 +50,43 @@ function Timeline(data) {
 	compressedRatio = 1/4, // how much of the space to use for compressed periods
 	eonWidth = 24,
 	iterationWidth = 38,
-	
+
 	getPeriodDrawHeight = function(start, end, totalHeight) {
 		var availablePixels = totalHeight,
 			myaInPeriod = start - end;
-		
+
 		if (start <= myaExpanded) { // expanded view for newer times; all expanded share 3/4 of the space
 			var pxAvailable = totalHeight - (totalHeight * compressedRatio),
 			    yearsPerPixel = pxAvailable/myaExpanded;
-				
+
 			return myaInPeriod * yearsPerPixel;
 		}
 		else { // compressed view; all compressed share 1/4 of the space
 			var pxAvailable = totalHeight * compressedRatio,
 			    yearsPerPixel = pxAvailable/myaCompressed;
-				
+
 			return myaInPeriod * yearsPerPixel;
 		}
-		
+
 		return totalHeight / (times.length-1);
 	},
 	drawEons = function(ctx, width, height) {
 		var textHeight = 8,
 		    drawPos = height;
-		for (var i = 0; i < times.length-1; i++) { 
+		for (var i = 0; i < times.length-1; i++) {
 			var time = times[i],
 			    name = time.name,
 				start = time.start,
 				end = times[i+1].start,
 				color = time.color,
 				drawHeight = getPeriodDrawHeight(start, end, height);
-			
+
 			/* Draw the eon background */
 			ctx.fillStyle = color;
 			ctx.fillRect(0, drawPos-drawHeight, eonWidth, drawHeight);
 			ctx.strokeStyle = 'black';
 			ctx.strokeRect(0, drawPos-drawHeight, eonWidth, drawHeight);
-			
+
 			/* Draw the eon text */
 			var textWidth = ctx.measureText(name).width;
 			ctx.save();
@@ -95,7 +95,7 @@ function Timeline(data) {
 			ctx.fillStyle = 'black';
 			ctx.fillText(name.toUpperCase(), (drawPos - (drawHeight-textWidth)/2)* -1, 15);
 			ctx.restore();
-			
+
 			drawPos = drawPos - drawHeight;
 		}
 	},
@@ -113,11 +113,11 @@ function Timeline(data) {
 			compressedDivHeight = compressedHeight / (myaCompressed / compressedDivSpan),
 			expandedDivHeight = expandedHeight / (myaExpanded / expandedDivSpan),
 			labelCoords = []; // hold coords and years for labeling step
-		
+
 		/* Draw compressed divisions */
 		while (currTime > myaExpanded)  {
 			drawPos -= compressedDivHeight;
-			
+
 			if (drawEven) {
 				ctx.fillStyle = evenColor;
 			}
@@ -125,7 +125,7 @@ function Timeline(data) {
 				ctx.fillStyle = oddColor;
 			}
 			drawEven = !drawEven;
-			
+
 			labelCoords.push({
 				x: eonWidth+1,
 				y: drawPos,
@@ -136,10 +136,10 @@ function Timeline(data) {
 				compressed: true,
 			});
 			ctx.fillRect(eonWidth+1, drawPos, iterationWidth, compressedDivHeight);
-			
+
 			currTime -= compressedDivSpan;
 		}
-		
+
 		/* Draw expanded divisions */
 		currTime = myaExpanded;
 		drawPos = scaleChange;
@@ -154,7 +154,7 @@ function Timeline(data) {
 				ctx.fillStyle = oddColor;
 			}
 			drawEven = !drawEven;
-			
+
 			labelCoords.push({
 				x: eonWidth+1,
 				y: drawPos,
@@ -164,7 +164,7 @@ function Timeline(data) {
 				end: currTime - cmod,
 			});
 			ctx.fillRect(eonWidth+1, drawPos, iterationWidth, corrHeight);
-			
+
 			currTime -= cmod;
 		}
 		while (currTime >= 0) {
@@ -176,7 +176,7 @@ function Timeline(data) {
 				ctx.fillStyle = oddColor;
 			}
 			drawEven = !drawEven;
-			
+
 			labelCoords.push({
 				x: eonWidth+1,
 				y: drawPos,
@@ -186,7 +186,7 @@ function Timeline(data) {
 				end: currTime - expandedDivSpan
 			});
 			ctx.fillRect(eonWidth+1, drawPos, iterationWidth, expandedDivHeight);
-			
+
 			currTime -= expandedDivSpan;
 		}
 		if (drawPos > 0)  {
@@ -196,7 +196,7 @@ function Timeline(data) {
 			else {
 				ctx.fillStyle = oddColor;
 			}
-			
+
 			labelCoords.push({
 				x: eonWidth+1,
 				y: 0,
@@ -207,25 +207,25 @@ function Timeline(data) {
 			});
 			ctx.fillRect(eonWidth+1, 0, iterationWidth, drawPos);
 		}
-		
+
 		/* Draw the scale change division */
 		ctx.strokeStyle = 'black';
 		ctx.beginPath();
 		ctx.moveTo(eonWidth+1, scaleChange);
 		ctx.lineTo(eonWidth+iterationWidth, scaleChange);
 		ctx.stroke();
-		
+
 		/* Draw the outline */
 		ctx.strokeStyle = 'black';
 		ctx.strokeRect(eonWidth, 0, iterationWidth, height);
-		
+
 		/* Draw the year division labels */
 		ctx.fillStyle = 'black';
 		for (var i = 0; i < labelCoords.length; i++) {
 			var coord = labelCoords[i],
 			    text = coord.end,
 				textWidth = ctx.measureText(text).width;
-			
+
 			if (text > 0 && (!coord.compressed || (text%1000 === 0))) {
 				ctx.fillText(text, coord.x + (coord.width-textWidth)/2, coord.y + 6/2);
 			}
@@ -241,7 +241,7 @@ function Timeline(data) {
 		for (var i = 0; i < times.length-1; i++) {
 			var time = times[i],
 			    next = times[i+1];
-			
+
 			if (time.start == start) {
 				var drawHeight = getPeriodDrawHeight(time.start, next.start, height);
 				endPx = startPx + drawHeight;
@@ -249,7 +249,7 @@ function Timeline(data) {
 			}
 			startPx -= getPeriodDrawHeight(time.start, next.start, height);
 		}
-		
+
 		return {
 			start: startPx,
 			end: endPx
@@ -257,9 +257,9 @@ function Timeline(data) {
 	},
 	periodBoundsForAge = function(age) {
 		for (var i = 0; i < times.length-1; i++) {
-			time = times[i],
+			time = times[i];
 			next = times[i+1];
-			
+
 			if (age <= time.start && age > next.start) {
 				return {
 					start: time.start,
@@ -275,7 +275,7 @@ function Timeline(data) {
 			pixelRange = pixelBounds.end - pixelBounds.start,
 			myaPerPixel = periodRange / pixelRange,
 			ageSincePeriodStart = period.start - age;
-		
+
 		return pixelBounds.start - (ageSincePeriodStart / myaPerPixel);
 	},
 	handleEvents = function(canvas, rows, events) {
@@ -292,16 +292,16 @@ function Timeline(data) {
 						y = row.y,
 						width = item.width,
 						height = row.height;
-					
+
 					if (posX >= x && posX <= x + width && posY <= y && posY >= y - height) { // event within organism bounds; execute callback with located organism
 						var org = data[i];
-						
+
 						cb(org, e, row);
 						break;
 					}
 				}
-			}
-		
+			};
+
 		if (onClick) {
 			canvas.addEventListener('click', function(e) {
 				evtFn(e, onClick);
@@ -319,7 +319,7 @@ function Timeline(data) {
 		    opsDone = 0; // keep track of whether or not all image load events have fired so that dodge can be called correctly
 		dodger.left = 64;
 		dodger.lineLength = 40;
-		
+
 		data.push({
 			id: -1,
 			name: {
@@ -338,7 +338,7 @@ function Timeline(data) {
 				age = org.branch.length,
 				corr = org.branch.correction,
 				images = org.figurines;
-			
+
 			ctx.fillStyle = 'black';
 			dodger.lineToRow(function(ctx2) {
 				var visible = name;
@@ -346,9 +346,9 @@ function Timeline(data) {
 					visible += ", " + age;
 				}
 				if (corr) {
-					visible += " \u00B1 " + corr;;
+					visible += " \u00B1 " + corr;
 				}
-				
+
 				var xpos = 0,
 				    ypos = ageToPx(age, height),
 					rows = [],
@@ -362,29 +362,44 @@ function Timeline(data) {
 							img = new Image(),
 							cpyX = xpos,
 							cpyY = ypos;
-						img.onload = function() { 
-							ctx2.drawImage(img, cpyX+10, cpyY-10, 20, 20);
-							
+
+						img.onerror = function() {
+							if (opsDone == --opsTotal) {
+								var rows = dodger.dodge();
+								if (events) {
+									handleEvents(ctx.canvas, rows, events);
+								}
+							}
+						};
+						img.onload = function() {
+							ctx2.drawImage(this, cpyX+10, cpyY-10, 20, 20);
 							if (++opsDone == opsTotal) { // finished all placement ops, do actual dodging draw
 								var rows = dodger.dodge();
 								if (events) {
 									handleEvents(ctx.canvas, rows, events);
 								}
 							}
-						}
+						};
+
 						img.src = fig;
 					})();
 					xpos += 32;
 				}
+        if (!opsTotal) { // no images to attach event to
+          var dodgedRows = dodger.dodge();
+          if (events) {
+            handleEvents(ctx.canvas, dodgedRows, events);
+          }
+        }
 			});
 		}
 	};
-	
+
 	this.render = function(canvas, events) {
 		var context = canvas.getContext('2d'),
 		    width = canvas.width,
 			height = canvas.height;
-		
+
 		drawBar(context, width, height);
 		drawLabels(context, width, height, events);
 	};
